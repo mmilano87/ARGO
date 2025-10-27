@@ -1,3 +1,116 @@
+# ARGO: Ricci-Curvature-Guided Graph Neural Network Framework
+
+**ARGO** (Algorithm for Ricci-curvature-Guided Optimization) is a Python framework for **community detection and topological learning** on biological networks.  
+It combines **network geometry (Ricci curvature)** with **Graph Neural Networks (GNNs)** to produce biologically meaningful embeddings and identify functional modules in gene co-expression or interaction networks.
+
+Developed at the **University “Magna Graecia” of Catanzaro**, ARGO is part of a research pipeline integrating curvature, graph topology, and neural learning methods for biomedical data.
+
+---
+
+## 🧩 What the Script Does
+
+### **Input**
+Reads two files, previously generated from curvature analysis (e.g., using `curvaturanew.py`):
+
+| File | Description | Required Columns |
+|------|--------------|------------------|
+| `curvature_edges.txt` | Edge list with Ricci curvature values | `source`, `target`, `ricci_curvature` |
+| `node_labels_features.txt` | Node-level metadata and features | `symbol`, `degree`, `strength`, ... |
+
+Default paths can be modified at the top of the script:
+```python
+BASE = "/Users/mariannamilano/Desktop/"
+EDGE_FILE_CURV = os.path.join(BASE, "curvature_edges.txt")
+NODE_FEAT_FILE = os.path.join(BASE, "node_labels_features.txt")
+OUT_DIR = os.path.join(BASE, "results")
+
+
+Processing Steps
+1. Network Construction
+
+Builds a weighted undirected graph from curvature-weighted edges.
+
+Normalizes curvature values to positive weights.
+
+Computes node-level statistics (degree and strength).
+
+2. Graph Neural Network (GCN Autoencoder)
+
+Initializes a 2-layer GCNEncoder (Graph Convolutional Network).
+
+Learns low-dimensional embeddings by reconstructing network edges.
+
+Uses a link prediction loss (binary cross-entropy with random negative sampling).
+
+3. Training Phase
+
+Optimizes the GCN with Adam optimizer (default 200 epochs, lr=1e-3).
+
+Logs and plots the training loss (training_loss.csv and training_loss.png).
+
+4. Evaluation
+
+Performs link reconstruction to compute:
+
+AUC (Area Under ROC Curve)
+
+AUPR (Area Under Precision-Recall Curve)
+
+Generates corresponding ROC and PR plots.
+
+5. Community Detection
+
+Applies K-Means clustering on the learned embeddings.
+
+Automatically selects the best number of clusters (K) maximizing the Silhouette Score.
+
+Outputs community composition and sizes.
+
+6. Visualization
+
+Performs PCA on the embedding space (2D visualization).
+
+Colors nodes by community assignment (embedding_pca.png).
+
+📂 Output Files
+
+All results are saved in the specified output folder (default: /Users/mariannamilano/Desktop/results/).
+
+File	Description
+communities.txt	List of detected communities and their members
+metrics.txt	AUC, AUPR, best K, Silhouette score, and cluster sizes
+gnn_embeddings.npy	Learned node embeddings
+training_loss.csv / training_loss.png	Training loss log and plot
+roc_curve.png / pr_curve.png	ROC and Precision–Recall curves
+embedding_pca.png	PCA visualization of GNN embeddings
+node_order.txt	Node order corresponding to embeddings
+⚙️ Requirements
+
+Install all required dependencies with:
+
+pip install torch torch_geometric pandas numpy networkx scikit-learn matplotlib
+
+Minimum Python version
+
+Python ≥ 3.8
+
+Note:
+If PyTorch Geometric installation fails on CPU, use:
+
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install torch_geometric
+
+🚀 Usage
+
+Run directly from terminal:
+
+python argo.py
+
+
+All results will be generated in the results/ directory.
+The script will display AUC, AUPR, and cluster metrics in the terminal.
+
+
 # Curvature Analysis on Gene Co-Expression Networks
 
 This Python script performs a complete topological analysis pipeline on gene co-expression networks, integrating biological and geometric properties through **Ollivier–Ricci curvature**.  
